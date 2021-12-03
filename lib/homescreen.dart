@@ -15,21 +15,19 @@ class homescreen extends StatefulWidget {
 class _homescreenState extends State<homescreen> {
   File? _imageFile;
   final picker = ImagePicker();
-
-  
+  int sizeOfOriginalImage = 0;
 
   @override
   Widget build(BuildContext context) {
     Future pickImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (mounted) {
-      setState(() {
-        _imageFile = File(pickedFile!.path);
-      });
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (mounted) {
+        setState(() {
+          _imageFile = File(pickedFile!.path);
+        });
+      }
     }
-  }
 
-  
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -41,19 +39,40 @@ class _homescreenState extends State<homescreen> {
       body: Container(
         height: displayHeight(context),
         width: displayWidth(context),
-        child: Center(
-          child: TextButton(
-            style: ButtonStyle(
-                elevation: MaterialStateProperty.all(5),
-                backgroundColor: MaterialStateProperty.all(Colors.black54)),
-            child: const Text(
-              'Upload',
-              style: TextStyle(color: Colors.white),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            TextButton(
+              style: ButtonStyle(
+                  elevation: MaterialStateProperty.all(5),
+                  backgroundColor: MaterialStateProperty.all(Colors.black54)),
+              child: const Text(
+                'Upload',
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () {
+                pickImage().then((value) async {
+                  sizeOfOriginalImage = await _imageFile!.length();
+                  print(sizeOfOriginalImage);
+                });
+              },
             ),
-            onPressed: () {
-              pickImage();
-            },
-          ),
+            SizedBox(
+              height: displayHeight(context) * 0.3,
+              width: displayWidth(context) * 0.5,
+              child: (_imageFile != null)
+                  ? Image.file(
+                      _imageFile!,
+                      fit: BoxFit.fill,
+                    )
+                  : null,
+            ),
+            const Opacity(opacity: 0,child: Divider()),
+            (_imageFile != null
+                ? (Text('Size of original image : $sizeOfOriginalImage bytes'))
+                : const Text('No image selected')),
+          ],
         ),
       ),
     );
